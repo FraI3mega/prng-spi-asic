@@ -39,7 +39,7 @@
 
         isLinux = pkgs.stdenv.hostPlatform.isLinux;
 
-        pythonEnv = pkgs.python3.withPackages (
+        pythonEnv = pkgs.python313.withPackages (
           ps: with ps; [
             apycula
             amaranth
@@ -56,6 +56,13 @@
             cairosvg
             rich
             requests
+            gitpython
+            python-frontmatter
+            mistune
+            configupdater
+            klayout
+            matplotlib
+            pillow
           ]
         );
       in
@@ -98,14 +105,19 @@
               pkgs.ninja
               pkgs.git
               pkgs.slang-server
+              (pkgs.writeShellScriptBin "yowasp-yosys" ''
+                exec ${edaPkgs.yosysFull}/bin/yosys "$@"
+              '')
             ]
             ++ lib.optionals isLinux [
               edaPkgs.xyce
             ];
 
             shellHook = ''
+              export PATH="${pythonEnv}/bin:$PATH"
               export PDK_ROOT="$PWD/.pdk"
-              export PDK="sky130A"
+              export PDK="gf180mcuD"
+              mkdir -p "$PDK_ROOT"
             '';
           };
 
