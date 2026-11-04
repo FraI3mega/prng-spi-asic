@@ -97,6 +97,7 @@
               pkgs.cmake
               pkgs.ninja
               pkgs.git
+              pkgs.slang-server
             ]
             ++ lib.optionals isLinux [
               edaPkgs.xyce
