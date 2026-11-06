@@ -16,7 +16,7 @@ module tt_um_frai3mega_prng_spi (
 );
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, ui_in, 1'b0};
+  wire _unused = &{ena, ui_in, uio_in[7:3], 1'b0};
   assign uo_out = 8'b0;
   assign uio_oe = 8'b00001000;  // Enable MISO
   assign {uio_out[7:4], uio_out[2:0]} = 7'b0;
@@ -39,7 +39,6 @@ module tt_um_frai3mega_prng_spi (
   (* async_reg = "true" *) logic [2:0] CSr;
   always_ff @(posedge clk) CSr <= {CSr[1:0], CSn};
   wire CS_active = ~CSr[1];
-  wire CS_startmessage = CSr[2:1] == 2'b10;
   wire CS_endmessage = CSr[2:1] == 2'b01;
 
   (* async_reg = "true" *) logic [1:0] MOSIr;
@@ -129,7 +128,7 @@ module tt_um_frai3mega_prng_spi (
     end
   end
 
-  assign MISO = byte_data_sent[7];
+  assign MISO = (CS_active) ? byte_data_sent[7] : 1'b0;
 
 
 
