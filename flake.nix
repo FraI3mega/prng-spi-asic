@@ -105,6 +105,7 @@
               pkgs.ninja
               pkgs.git
               pkgs.slang-server
+              pkgs.verible
               (pkgs.writeShellScriptBin "yowasp-yosys" ''
                 exec ${edaPkgs.yosysFull}/bin/yosys "$@"
               '')
