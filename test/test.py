@@ -79,6 +79,37 @@ async def test_spi_ping(dut):
     assert dut.uio_out.value == 0x00
 
 
+@cocotb.test()
+async def test_xorshift_init(dut):
+    await init(dut)
+    assert dut.uio_out.value == 0x00
+
+    state = 0xAABB
+    # init xorshift
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x02)
+    await exchange_byte(dut, (state & 0xFF00) >> 8)
+    await exchange_byte(dut, (state & 0xFF))
+
+    await ClockCycles(dut.clk, 5)
+    set_pin(dut, CS, 1)
+    await ClockCycles(dut.clk, 10)
+    assert dut.uio_out.value == 0x00
+
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x03)
+    b1 = await exchange_byte(dut, 0x00)
+    b2 = await exchange_byte(dut, 0x00)
+    assert b1 << 8 | b2 == state
+
+    await ClockCycles(dut.clk, 5)
+    set_pin(dut, CS, 1)
+
+
 # @cocotb.test()
 # async def test_project(dut):
 #     await init(dut)

@@ -73,32 +73,48 @@ module tt_um_frai3mega_prng_spi (
   logic [15:0] state;
   logic [15:0] initial_state;
   logic initialize;
+  logic step;
 
 
   xorshift16 xs16 (
       .initial_state(initial_state),
       .initialize   (initialize || ~rst_n),
       .clk          (clk),
-      .step         (byte_received),
+      .step         (step),
       .state        (state)
   );
 
   //SEND
   logic [15:0] data_to_send;
   logic [ 7:0] byte_data_sent;
+  logic [ 1:0] await_bytes;
 
-  always_ff @(posedge clk)
+  always_ff @(posedge clk) begin
+    step <= 1'b0;
+    initialize <= 0;
     if (~rst_n) begin
       data_to_send <= 16'b0;
       byte_data_sent <= 8'b0;
       initialize <= 1;
       initial_state <= 16'hAAAA;
+      await_bytes <= 0;
+      step <= 0;
     end else if (byte_received) begin
-      case (byte_data_received)
-        8'h01:   data_to_send <= 16'hAA00;
-        8'h03:   data_to_send <= state;
-        default: ;
-      endcase
+      if (await_bytes > 0) begin
+        initial_state <= {initial_state[7:0], byte_data_received};
+        initialize <= await_bytes == 2'd1;
+        await_bytes <= await_bytes - 2'b01;
+      end else begin
+        case (byte_data_received)
+          8'h01:   data_to_send <= 16'hAA00;
+          8'h02:   await_bytes <= 2'b10;
+          8'h03: begin
+            step <= 1'd1;
+            data_to_send <= state;
+          end
+          default: ;
+        endcase
+      end
     end else if (CS_active) begin
       if (SCK_fallingedge) begin
         if (bitcnt == 3'b000) begin
@@ -109,8 +125,9 @@ module tt_um_frai3mega_prng_spi (
     end else if (CS_endmessage) begin
       byte_data_sent <= 8'b0;
       data_to_send <= 16'b0;
-      initialize <= 0;
+      await_bytes <= 0;
     end
+  end
 
   assign MISO = byte_data_sent[7];
 
