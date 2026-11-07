@@ -4,6 +4,7 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
+import random
 
 
 def xorshift16(state):
@@ -54,6 +55,28 @@ async def exchange_byte(dut, byte, half_period=8):
     return in_byte
 
 
+async def init_xor(dut, state):
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x02)
+    await exchange_byte(dut, (state & 0xFF00) >> 8)
+    await exchange_byte(dut, (state & 0xFF))
+
+    await ClockCycles(dut.clk, 5)
+    set_pin(dut, CS, 1)
+    await ClockCycles(dut.clk, 10)
+    assert dut.uio_out.value == 0x00
+
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x03)
+    b1 = await exchange_byte(dut, 0x00)
+    b2 = await exchange_byte(dut, 0x00)
+    assert b1 << 8 | b2 == state
+
+
 @cocotb.test()
 async def test_reset(dut):
     await init(dut)
@@ -84,7 +107,7 @@ async def test_xorshift_init(dut):
     await init(dut)
     assert dut.uio_out.value == 0x00
 
-    state = 0xAABB
+    state = random.randint(0x0001, 0xFFFF)  # 0xAABB
     # init xorshift
     set_pin(dut, CS, 0)
     await ClockCycles(dut.clk, 5)
@@ -108,6 +131,77 @@ async def test_xorshift_init(dut):
 
     await ClockCycles(dut.clk, 5)
     set_pin(dut, CS, 1)
+
+
+@cocotb.test()
+async def test_xorshift_interrupt_init(dut):
+    await init(dut)
+    assert dut.uio_out.value == 0x00
+
+    state = random.randint(0x0001, 0xFFFF)  # 0xAABB
+    # init xorshift
+    await init_xor(dut, state)
+
+    await exchange_byte(dut, 0x03)
+    b1 = await exchange_byte(dut, 0x00)
+    b2 = await exchange_byte(dut, 0x00)
+    sent_state = b1 << 8 | b2
+
+    state = xorshift16(state)
+    assert sent_state == state
+
+    # interrupt init
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x02)
+    await exchange_byte(dut, (state & 0xFF00) >> 8)
+
+    await ClockCycles(dut.clk, 5)
+    set_pin(dut, CS, 1)
+    await ClockCycles(dut.clk, 10)
+
+    set_pin(dut, CS, 0)
+    await ClockCycles(dut.clk, 5)
+
+    await exchange_byte(dut, 0x03)
+    b1 = await exchange_byte(dut, 0x00)
+    b2 = await exchange_byte(dut, 0x00)
+    sent_state = b1 << 8 | b2
+
+    state = xorshift16(state)
+    assert sent_state == state
+
+    await ClockCycles(dut.clk, 5)
+    set_pin(dut, CS, 1)
+
+
+@cocotb.test()
+async def test_xorshift_cycle(dut):
+    await init(dut)
+    assert dut.uio_out.value == 0x00
+
+    state = random.randint(0x0001, 0xFFFF)  # 0xAABB
+    # init xorshift
+    await init_xor(dut, state)
+
+    # query next
+    await exchange_byte(dut, 0x03)
+    b1 = await exchange_byte(dut, 0x00)
+    b2 = await exchange_byte(dut, 0x00)
+    sent_state = b1 << 8 | b2
+
+    state = xorshift16(state)
+    assert sent_state == state
+
+    for i in range(20):
+        await exchange_byte(dut, 0x03)
+        b1 = await exchange_byte(dut, 0x00)
+        b2 = await exchange_byte(dut, 0x00)
+        sent_state = b1 << 8 | b2
+
+        state = xorshift16(state)
+        assert sent_state == state
 
 
 # @cocotb.test()
