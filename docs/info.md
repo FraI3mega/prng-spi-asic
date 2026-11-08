@@ -13,7 +13,8 @@ The module has an internal 16-bit xorshift prng, accessible over spi.
 
 ## How to test
 
-Connect to the chip according to the provided pinout. Afterwards initialize the PRNG with a 2-byte seed. The next query of the state should return the initial state.
+Connect to the chip according to the provided pinout. Pull reset down for 5 cycles, then pull it up. Afterwards initialize the PRNG with a 2-byte seed. The next query of the state should return the initial state.
+The internal PRG state changes only after reading it.
 
 ### Command Table
 
