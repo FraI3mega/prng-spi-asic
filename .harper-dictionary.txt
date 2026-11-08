@@ -1,0 +1,8 @@
+PRNG
+SPI
+asic
+fpga4fun
+show-rule
+tapeout
+xorshift
+xorshift16
