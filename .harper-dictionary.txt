@@ -1,3 +1,5 @@
+HDLBits
+Nandgame
 PRNG
 SPI
 asic

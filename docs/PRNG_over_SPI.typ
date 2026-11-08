@@ -17,13 +17,14 @@
 #set document(
   title: [@PRNG:s over @SPI:s in Silicon – Or Making My First @ASIC:s],
   author: "FraI3mega",
-  date: datetime(year: 2026, month: 11, day:8),
+  date: datetime(year: 2026, month: 11, day: 8),
 )
 #title()
-November 2026
+FraI3mega, November 2026
 
 #image("render.png")
 
+#text(24pt, font: "IBM Plex Sans SmBld", fill: red)[NOTICE: This project is still WIP]
 
 #outline()
 
@@ -194,7 +195,7 @@ Making a proper testing harness also would make the process way more dependable.
 = Okay, I Also Want To Start
 I would recommend that you start off with learning an @HDL, Verilog (specifically SystemVerilog) is a good choice.
 For learning it #link("https://hdlbits.01xz.net/wiki/Problem_sets#Getting_Started")[HDLBits] is a great resource.
-If you want to learn digital logic #link("https://nandgame.com/")[Nandgame] is a great way to go from making logic gates, to your own cpu.
+If you want to learn digital logic #link("https://nandgame.com/")[Nandgame] is a great way to go from making logic gates, to your own CPU.
 
 
 = Additional resources
