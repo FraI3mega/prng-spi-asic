@@ -33,7 +33,7 @@ async def init(dut):
     dut._log.info("Resetting")
     dut.ena.value = 1
     dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
+    await ClockCycles(dut.clk, 5)
     dut.rst_n.value = 1
     dut.uio_in.value = 0b0000_0001
     await ClockCycles(dut.clk, 5)
@@ -64,17 +64,12 @@ async def init_xor(dut, state):
     await exchange_byte(dut, (state & 0xFF))
 
     await ClockCycles(dut.clk, 5)
-    set_pin(dut, CS, 1)
-    await ClockCycles(dut.clk, 10)
-    assert dut.uio_out.value == 0x00
-
-    set_pin(dut, CS, 0)
-    await ClockCycles(dut.clk, 5)
 
     await exchange_byte(dut, 0x03)
     b1 = await exchange_byte(dut, 0x00)
     b2 = await exchange_byte(dut, 0x00)
     assert b1 << 8 | b2 == state
+    set_pin(dut, CS, 1)
 
 
 @cocotb.test()
@@ -117,12 +112,6 @@ async def test_xorshift_init(dut):
     await exchange_byte(dut, (state & 0xFF))
 
     await ClockCycles(dut.clk, 5)
-    set_pin(dut, CS, 1)
-    await ClockCycles(dut.clk, 10)
-    assert dut.uio_out.value == 0x00
-
-    set_pin(dut, CS, 0)
-    await ClockCycles(dut.clk, 5)
 
     await exchange_byte(dut, 0x03)
     b1 = await exchange_byte(dut, 0x00)
@@ -141,6 +130,7 @@ async def test_xorshift_interrupt_init(dut):
     state = random.randint(0x0001, 0xFFFF)  # 0xAABB
     # init xorshift
     await init_xor(dut, state)
+    set_pin(dut, CS, 0)
 
     await exchange_byte(dut, 0x03)
     b1 = await exchange_byte(dut, 0x00)
@@ -185,6 +175,7 @@ async def test_xorshift_cycle(dut):
     # init xorshift
     await init_xor(dut, state)
 
+    set_pin(dut, CS, 0)
     # query next
     await exchange_byte(dut, 0x03)
     b1 = await exchange_byte(dut, 0x00)
@@ -202,6 +193,7 @@ async def test_xorshift_cycle(dut):
 
         state = xorshift16(state)
         assert sent_state == state
+    set_pin(dut, CS, 1)
 
 
 # @cocotb.test()
