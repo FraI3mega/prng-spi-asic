@@ -2,9 +2,10 @@ VERILOG_SOURCES := $(wildcard *.v) $(wildcard *.sv)
 GOWIN_BOARD ?= tang_nano_20k
 GOWIN_DEVICE ?= GW2AR-LV18QN88C8/I7
 GOWIN_FAMILY ?= GW2A-18C
+GOWIN_FAMILY_YOSYS ?= gw2a
 
 design_gowin.json: $(VERILOG_SOURCES)
-	yosys -p "read_verilog -sv $(VERILOG_SOURCES); synth_gowin -json design_gowin.json"
+	yosys -p "read_verilog -sv $(VERILOG_SOURCES); synth_gowin -family $(GOWIN_FAMILY_YOSYS) -top top_gowin -json design_gowin.json"
 
 pnr_gowin.json: design_gowin.json $(GOWIN_BOARD).cst
 	nextpnr-himbaechel --json design_gowin.json \

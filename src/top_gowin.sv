@@ -1,4 +1,4 @@
-module top (
+module top_gowin (
     input wire clk,
     SCK,
     input logic MOSI,

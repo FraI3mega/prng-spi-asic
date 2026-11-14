@@ -97,7 +97,10 @@
               pkgs.sv-lang
               pkgs.verible
               pkgs.svls
-              pkgs.nextpnr
+              pkgs.nextpnrWithGui
+              (pkgs.writeShellScriptBin "xdot" ''
+                exec ${pkgs.xdot}/bin/xdot "$@"
+              '')
               pkgs.openfpgaloader
               pkgs.openocd
               pkgs.gnumake
