@@ -1,17 +1,17 @@
 # Tiny Tapeout project information
 project:
-  title:        "SPI PRNG"      # Project title
-  author:       "FraI3mega"      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "A PRNG communicating over spi"      # One line description of what your project does
-  language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     16000000       # Clock frequency in Hz (or 0 if not applicable)
+  title: "SPI PRNG" # Project title
+  author: "FraI3mega" # Your name
+  discord: "" # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  description: "A 16-bit xorshift PRNG, with which you can interface over the SPI bus" # One line description of what your project does
+  language: "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  clock_hz: 16000000 # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 340x160 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
+  tiles: "1x1" # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_frai3mega_prng_spi"
+  top_module: "tt_um_frai3mega_prng_spi"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
