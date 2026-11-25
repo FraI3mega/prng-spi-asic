@@ -24,7 +24,11 @@ FraI3mega, November 2026
 
 #image("render.png")
 
-#text(24pt, font: "IBM Plex Sans SmBld", fill: red)[NOTICE: This project is still WIP]
+#text(
+  20pt,
+  font: "IBM Plex Sans SmBld",
+  fill: red,
+)[NOTICE: This project is still WIP, I plan to update it once I (hopefully) get the chip]
 
 #outline()
 
@@ -179,6 +183,55 @@ Else, the byte is compared to known commands, which decide on the next action.
 ```
 
 If we hadn't received a byte on this clock cycle, the system sends a bit out on the falling edge of the SPI clock.
+
+== Testing
+
+I got my hands on a Tang Nano 20k to test out the chip in practice, which I wired to a Raspberry Pi Pico.
+For the firmware, I used MicroPython
+```py
+from machine import Pin, SPI
+cs = Pin(5, Pin.OUT, value=1)
+spi = SPI(0, 1_000_000, sck=Pin(2), mosi=Pin(3), miso=Pin(4))
+
+#Ping
+try:
+    cs(0)
+    spi.write(b'\x01')
+    rxdata = spi.read(1, 0x00)
+finally:
+    cs(1)
+
+print(rxdata)
+
+#write seed
+try:
+    cs(0)
+    spi.write(b'\x02\xAA\xBB')
+    spi.write(b'\x03')
+    rxdata = spi.read(2, 0x00)
+finally:
+    cs(1)
+
+print(rxdata)
+
+#read back number
+try:
+    cs(0)
+    spi.write(b'\x03')
+    rxdata = spi.read(2, 0x00)
+finally:
+    cs(1)
+print(rxdata)
+
+```
+
+After running this little script, I got back this response.
+```
+b'\xaa'
+b'\xaa\xbb'
+b'\xb7@'
+```
+Which means that the design works.
 
 = But Why
 
